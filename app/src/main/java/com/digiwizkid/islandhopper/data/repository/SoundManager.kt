@@ -18,6 +18,7 @@ internal class SoundManager {
         }
         return toneGenerator!!
     }
+
     private var isMusicOn = true
 
     fun setMusicOn(on: Boolean) {
@@ -38,7 +39,7 @@ internal class SoundManager {
 
     fun playStreakSound() {
         if (!isMusicOn) return
-        ensureToneGenerator().startTone(ToneGenerator.TONE_PROP_BEEP2, 400)
+        ensureToneGenerator().startTone(ToneGenerator.TONE_DTMF_9, 300)
     }
 
     fun playGameOverSound() {
@@ -48,19 +49,21 @@ internal class SoundManager {
 
     fun vibrate(context: Context) {
         val v = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val manager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-            manager.defaultVibrator
+            val manager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
+            manager?.defaultVibrator
         } else {
             @Suppress("DEPRECATION")
-            context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            v.vibrate(
-                VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE)
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            v.vibrate(50)
+        if (v != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                v.vibrate(
+                    VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE)
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                v.vibrate(50)
+            }
         }
     }
 

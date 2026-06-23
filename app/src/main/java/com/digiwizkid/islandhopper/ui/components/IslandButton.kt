@@ -50,10 +50,10 @@ internal fun IslandButton(
 
     val label = island.label
     val (buttonSize, fontSize) = when {
-        label.length <= 6 -> Pair(110.dp, 20.sp)
-        label.length <= 10 -> Pair(115.dp, 16.sp)
-        label.length <= 16 -> Pair(120.dp, 13.sp)
-        else -> Pair(125.dp, 10.5.sp)
+        label.length <= 6 -> Pair(140.dp, 22.sp)
+        label.length <= 10 -> Pair(145.dp, 18.sp)
+        label.length <= 16 -> Pair(150.dp, 14.sp)
+        else -> Pair(155.dp, 12.sp)
     }
 
     Button(

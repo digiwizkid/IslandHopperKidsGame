@@ -70,6 +70,9 @@ internal class GameRepository(private val context: Context) {
         }
     }
 
+    private fun shuffleIslands(questions: List<Question>): List<Question> =
+        questions.map { (prompt, islands) -> prompt to islands.shuffled() }
+
     private val _score = MutableStateFlow(0)
     val score: StateFlow<Int> = _score.asStateFlow()
 
@@ -88,7 +91,9 @@ internal class GameRepository(private val context: Context) {
     fun loadQuestionsForMode(mode: GameMode) {
         currentMode = mode
         currentDifficultyIndex = 0
-        currentQuestions = questionsByDifficulty[Difficulty.STARTER]?.get(mode) ?: emptyList<Question>()
+        currentQuestions = shuffleIslands(
+            questionsByDifficulty[Difficulty.STARTER]?.get(mode) ?: emptyList<Question>()
+        )
         currentQuestionIndex = 0
         correctCount = 0
         streak = 0
@@ -106,22 +111,24 @@ internal class GameRepository(private val context: Context) {
     }
 
     internal fun recordAnswer(isCorrect: Boolean): StreakResult {
-        var bonusAwarded = false
-        var difficultyAdvanced = false
-        if (isCorrect) {
-            streak++
-            correctCount++
-            _score.value += 1
-            if (streak > 0 && streak % 3 == 0) {
-                _score.value += 1
-                bonusAwarded = true
-            }
-        } else {
+        if (!isCorrect) {
             streak = 0
+            return StreakResult(0, false, false)
         }
+
+        streak++
+        correctCount++
+        _score.value += 1
+
+        val bonusAwarded = streak % 3 == 0
+        if (bonusAwarded) {
+            _score.value += 1
+        }
+
         val oldDifficultyIndex = currentDifficultyIndex
         updateDifficulty()
-        if (currentDifficultyIndex > oldDifficultyIndex) difficultyAdvanced = true
+        val difficultyAdvanced = currentDifficultyIndex > oldDifficultyIndex
+
         return StreakResult(streak, bonusAwarded, difficultyAdvanced)
     }
 
@@ -136,7 +143,9 @@ internal class GameRepository(private val context: Context) {
         if (newIndex > currentDifficultyIndex) {
             currentDifficultyIndex = newIndex
             val newDifficulty = allDifficultyOrder[currentDifficultyIndex]
-            currentQuestions = questionsByDifficulty[newDifficulty]?.get(currentMode) ?: currentQuestions
+            currentQuestions = shuffleIslands(
+                questionsByDifficulty[newDifficulty]?.get(currentMode) ?: currentQuestions
+            )
             currentQuestionIndex = 0
         }
     }

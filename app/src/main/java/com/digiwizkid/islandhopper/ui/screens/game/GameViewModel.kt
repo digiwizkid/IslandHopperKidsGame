@@ -64,11 +64,12 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             val newStreak = result.streak
             val bestStreak = maxOf(_uiState.value.bestStreak, newStreak)
 
-            soundManager.playCorrectSound()
             soundManager.vibrate(getApplication())
 
             if (result.bonusAwarded) {
                 soundManager.playStreakSound()
+            } else {
+                soundManager.playCorrectSound()
             }
 
             _uiState.value = _uiState.value.copy(
@@ -87,11 +88,13 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
             if (result.difficultyAdvanced) {
                 val newDiff = repository.getCurrentDifficulty()
+                if (!result.bonusAwarded) {
+                    soundManager.playStreakSound()
+                }
                 _uiState.value = _uiState.value.copy(
                     showLevelUp = true,
                     levelUpMessage = "Congratulations! You reached ${newDiff.displayName}!"
                 )
-                soundManager.playStreakSound()
                 viewModelScope.launch {
                     delay(2000)
                     _uiState.value = _uiState.value.copy(showLevelUp = false)

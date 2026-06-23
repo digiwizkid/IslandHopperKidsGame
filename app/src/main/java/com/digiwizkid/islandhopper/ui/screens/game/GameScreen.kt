@@ -116,6 +116,8 @@ internal fun GameScreen(
                         }
                     }
 
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     CharacterAnimation(position = uiState.characterPosition)
 
                     if (uiState.difficulty != Difficulty.STARTER) {
@@ -128,8 +130,10 @@ internal fun GameScreen(
 
                     QuestionPrompt(
                         text = uiState.questionPrompt,
-                        modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)
+                        modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 16.dp)
                     )
+
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     Column(
                         modifier = Modifier

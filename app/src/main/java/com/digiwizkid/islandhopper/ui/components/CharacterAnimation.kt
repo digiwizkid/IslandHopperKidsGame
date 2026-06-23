@@ -22,15 +22,11 @@ internal fun CharacterAnimation(
     modifier: Modifier = Modifier
 ) {
     val offsetX = remember { Animatable(0f) }
-    val offsetY = remember { Animatable(0f) }
 
     val targetX = (position % 3 - 1) * 80f
-    val targetY = (position / 3) * -60f
 
     LaunchedEffect(position) {
         offsetX.animateTo(targetX, animationSpec = tween(500))
-        offsetY.animateTo(targetY - 20f, animationSpec = tween(250))
-        offsetY.animateTo(targetY, animationSpec = tween(250))
     }
 
     Icon(
@@ -38,7 +34,7 @@ internal fun CharacterAnimation(
         contentDescription = "Player character",
         modifier = modifier
             .size(64.dp)
-            .offset { IntOffset(offsetX.value.roundToInt(), offsetY.value.roundToInt()) },
+            .offset { IntOffset(offsetX.value.roundToInt(), 0) },
         tint = MaterialTheme.colorScheme.tertiary
     )
 }
