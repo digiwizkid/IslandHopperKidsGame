@@ -1,7 +1,21 @@
 {
   "STARTER": {
     "SHAPES": [
-      {"question": "Which shape has three sides?", "islands": [{"id": 1, "label": "Triangle", "correct": true}, {"id": 2, "label": "Circle", "correct": false}]}
+      {"question": "Which shape has three sides?", "islands": [{"id": 1, "label": "Triangle", "correct": true}, {"id": 2, "label": "Circle", "correct": false}]},
+      {"question": "Which shape is round like a ball?", "islands": [{"id": 3, "label": "Circle", "correct": true}, {"id": 4, "label": "Square", "correct": false}]},
+      {"question": "Find the shape with four equal sides", "islands": [{"id": 5, "label": "Square", "correct": true}, {"id": 6, "label": "Triangle", "correct": false}]},
+      {"question": "Which shape looks like a kite?", "islands": [{"id": 7, "label": "Diamond", "correct": true}, {"id": 8, "label": "Square", "correct": false}]},
+      {"question": "Can you find the heart shape?", "islands": [{"id": 9, "label": "Heart", "correct": true}, {"id": 10, "label": "Star", "correct": false}]}
+    ]
+  },
+  "EASY": {
+    "SHAPES": [
+      {"question": "A pizza slice looks like which shape?", "islands": [{"id": 1, "label": "Triangle", "correct": true}, {"id": 2, "label": "Square", "correct": false}]}
+    ]
+  },
+  "MEDIUM": {
+    "SHAPES": [
+      {"question": "Which 3D shape is like a ball you can play with?", "islands": [{"id": 1, "label": "Sphere", "correct": true}, {"id": 2, "label": "Cube", "correct": false}]}
     ]
   }
 }

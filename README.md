@@ -1,48 +1,43 @@
 # Island Hopper 🏝️
 
-A fun educational Android game for kids to learn shapes, letters, and numbers by hopping between islands!
+A fun educational Android game for kids (ages 4–6) to learn shapes, letters, and numbers by hopping between islands!
 
 Built with **Kotlin**, **Jetpack Compose**, and **Unidirectional Data Flow (UDF)**.
 
 ## Features
 
-- **Three game modes**: Shapes, Letters, and Numbers
-- **5 difficulty levels**: Starter → Easy → Medium → Hard → Expert (auto-advances)
-- **75 questions**: 5 age-appropriate questions per level per mode
-- **Interactive island hopping**: Tap the correct island to advance
-- **Score tracking**: Earn points for correct answers
-- **Shake animation**: Visual feedback for wrong answers
-- **Character hop**: Animated character arcs between islands
-- **Particle effects**: Celebratory burst on correct answers
-- **Sound effects**: Correct/wrong tones with haptic feedback
-- **Music toggle**: On-screen control to mute/unmute audio
-- **Streak bonuses**: 🔥 counter with bonus points every 3 correct
-- **Adaptive difficulty**: Questions automatically get harder as you improve
-- **Timer mode**: ⏱ countdown challenge for advanced play
-- **Screen transitions**: Slide/fade animations between screens
-- **Kid-friendly theme**: Bright ocean palette with playful UI
+- **3 game modes**: Shapes, Letters, Numbers
+- **3 difficulty tiers**: Starter → Easy → Medium (auto-advance at 5 and 10 correct answers)
+- **226 questions** across all tiers, loaded from `assets/questions.json` — no recompile to edit
+- **Circular answer buttons**: 140–155 dp tap targets with vibrant rotating colours
+- **Score + streak**: always-visible star icon and 🔥 counter (bonus point every 3‑streak)
+- **Shake animation** on wrong answers, **particle burst** on correct
+- **Sound effects** (correct/wrong/streak/game‑over) + **haptic feedback**
+- **Timer mode** (⏱ 30 s countdown)
+- **Level‑up overlay** on difficulty advance
+- **Shuffled answers** — island order randomised each session
+- **Kid‑friendly ocean palette** with fade transitions
 
-## Difficulty Levels
+## Difficulty Tiers
 
-| Level | Age Group | Example Questions |
-|-------|-----------|-------------------|
-| **Starter** | 3-4 yrs | "Which one is round?", "Count the stars", "Find the letter A" |
-| **Easy** | 4-5 yrs | "1 + 1 = ?", "Which shape has 4 sides?", "Letters in CAT" |
-| **Medium** | 5-6 yrs | "2 + 3 = ?", "Which shape has 5 sides?", "Rhyming words" |
-| **Hard** | 6-7 yrs | "10 - 4 = ?", "Silent K words", "3 × 2 = ?" |
-| **Expert** | 7+ yrs | "7 × 3 = ?", "Plurals", "Fractions", "Geometry" |
+| Tier | Unlock | Questions | Example Topics |
+|------|--------|-----------|----------------|
+| **Starter** | Start | 76 | Basic shape ID, numbers 1–10, letters A–Z |
+| **Easy** | 5 correct | 75 | Real‑world shapes, addition (1+1…2+3), numbers 11–19, initial letter sounds |
+| **Medium** | 10 correct | 75 | 3‑D shapes (sphere/cube/cone/cylinder), add/sub to 10, letter order, vowels, phonics |
 
-Each level unlocks after 5 correct answers. A perfect run answers all 25 questions!
+Every tier has its own unique question set.
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
 | Language | Kotlin 2.0 |
-| UI | Jetpack Compose + Material3 |
+| UI | Jetpack Compose + Material 3 |
 | Architecture | UDF (ViewModel + StateFlow) |
-| Navigation | Navigation Compose |
-| Sound | ToneGenerator + Vibrator |
+| Navigation | Navigation Compose + fade transitions |
+| Sound | ToneGenerator + Vibrator (no audio files) |
+| Data | JSON asset + Android Assets API |
 | Build | Gradle KTS + Version Catalog |
 
 ## Project Structure
@@ -51,14 +46,14 @@ Each level unlocks after 5 correct answers. A perfect run answers all 25 questio
 com.digiwizkid.islandhopper/
 ├── data/
 │   ├── models/          # GameMode, Island, GameUiState, Difficulty
-│   └── repository/      # GameRepository (75 questions), SoundManager
+│   └── repository/      # GameRepository (JSON loader), SoundManager
 ├── ui/
-│   ├── theme/           # Color, Typography, Theme
+│   ├── theme/           # Colour, Typography, Theme
 │   ├── screens/
-│   │   ├── home/        # Mode selection screen (with timer toggle)
-│   │   ├── game/        # Main gameplay screen
+│   │   ├── home/        # Mode selection (with timer toggle)
+│   │   ├── game/        # Gameplay screen + ViewModel
 │   │   └── result/      # Score result screen
-│   └── components/      # Animated island, character, particles
+│   └── components/      # IslandButton, CharacterAnimation, ParticleEffect, QuestionPrompt, ScoreDisplay
 └── navigation/          # Screen routes + animated NavGraph
 ```
 
@@ -75,17 +70,21 @@ com.digiwizkid.islandhopper/
 
 ## Gameplay
 
-1. Select a game mode (Shapes, Letters, or Numbers) — or tap ⏱ for timer mode
-2. Read the question prompt
-3. Tap the correct island to score a point and build your streak
-4. Wrong answers shake the island — streaks reset!
-5. Difficulty auto-advances from Starter → Easy → Medium → Hard → Expert
-6. Complete all 25 questions (or beat the timer) to see your final score
+1. Pick a mode (Shapes, Letters, Numbers) — tap ⏱ for timer mode
+2. Read the question
+3. Tap the correct circular island to score + build your streak
+4. A wrong answer shakes the island and resets your streak
+5. The difficulty label advances at 5 and 10 correct answers
+6. Answer every question or let the timer run out to see your final score
+
+## Editing Questions
+
+Open `app/src/main/assets/questions.json`. Each entry has a `"question"` string and an `"islands"` array with `id`, `label`, and `correct` fields. No recompile needed.
 
 ## Running Tests
 
 ```bash
-# Unit tests
+# Unit tests (Robolectric)
 ./gradlew test
 
 # Instrumentation tests
@@ -94,4 +93,4 @@ com.digiwizkid.islandhopper/
 
 ## License
 
-This project is for educational purposes.
+Educational purposes.
