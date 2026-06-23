@@ -21,7 +21,9 @@ class GameScreenTest {
             )
         }
 
-        composeTestRule.onNodeWithText("Which one is a circle?")
-            .exists()
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithText("Which one is round?")
+            .assertExists()
     }
 }

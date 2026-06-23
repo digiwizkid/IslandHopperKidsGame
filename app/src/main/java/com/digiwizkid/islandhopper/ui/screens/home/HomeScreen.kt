@@ -2,11 +2,13 @@ package com.digiwizkid.islandhopper.ui.screens.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -17,13 +19,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.digiwizkid.islandhopper.data.models.GameMode
+import com.digiwizkid.islandhopper.ui.theme.CoralRed
 import com.digiwizkid.islandhopper.ui.theme.IslandGreen
 import com.digiwizkid.islandhopper.ui.theme.OceanBlue
-import com.digiwizkid.islandhopper.ui.theme.CoralRed
 
 @Composable
-fun HomeScreen(
+internal fun HomeScreen(
     onModeSelected: (String) -> Unit,
+    onTimerModeSelected: (String) -> Unit,
     viewModel: HomeViewModel = viewModel()
 ) {
     Column(
@@ -51,27 +55,51 @@ fun HomeScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         viewModel.availableModes.forEach { modeOption ->
-            Button(
-                onClick = { onModeSelected(modeOption.mode.name) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = when (modeOption.mode) {
-                        com.digiwizkid.islandhopper.data.models.GameMode.SHAPES -> CoralRed
-                        com.digiwizkid.islandhopper.data.models.GameMode.LETTERS -> IslandGreen
-                        com.digiwizkid.islandhopper.data.models.GameMode.NUMBERS -> OceanBlue
-                    }
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = modeOption.title,
-                        style = MaterialTheme.typography.titleLarge
+                Button(
+                    onClick = { onModeSelected(modeOption.mode.name) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(64.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = when (modeOption.mode) {
+                            GameMode.SHAPES -> CoralRed
+                            GameMode.LETTERS -> IslandGreen
+                            GameMode.NUMBERS -> OceanBlue
+                        }
                     )
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = modeOption.title,
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        Text(
+                            text = modeOption.description,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+
+                Button(
+                    onClick = { onTimerModeSelected(modeOption.mode.name) },
+                    modifier = Modifier
+                        .width(64.dp)
+                        .height(64.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = when (modeOption.mode) {
+                            GameMode.SHAPES -> CoralRed
+                            GameMode.LETTERS -> IslandGreen
+                            GameMode.NUMBERS -> OceanBlue
+                        }
+                    )
+                ) {
                     Text(
-                        text = modeOption.description,
-                        style = MaterialTheme.typography.bodyMedium
+                        text = "⏱",
+                        style = MaterialTheme.typography.titleLarge
                     )
                 }
             }

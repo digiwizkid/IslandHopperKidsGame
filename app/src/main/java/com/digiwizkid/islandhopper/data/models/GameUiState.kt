@@ -7,5 +7,15 @@ data class GameUiState(
     val activeIslands: List<Island> = emptyList(),
     val characterPosition: Int = 0,
     val isGameOver: Boolean = false,
-    val triggerShakeId: Int? = null
+    val triggerShakeId: Int? = null,
+    val streak: Int = 0,
+    val bestStreak: Int = 0,
+    val difficulty: Difficulty = Difficulty.STARTER,
+    val isTimerMode: Boolean = false,
+    val timeRemaining: Int = 30,
+    val showParticles: Boolean = false,
+    val lastAnswerCorrect: Boolean? = null,
+    val isMusicOn: Boolean = true,
+    val showLevelUp: Boolean = false,
+    val levelUpMessage: String = ""
 )

@@ -18,7 +18,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun IslandHopperTheme(content: @Composable () -> Unit) {
+internal fun IslandHopperTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = LightColorScheme,
         typography = Typography,

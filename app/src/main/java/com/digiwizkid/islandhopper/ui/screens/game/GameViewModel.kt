@@ -1,33 +1,57 @@
 package com.digiwizkid.islandhopper.ui.screens.game
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.digiwizkid.islandhopper.data.models.Difficulty
 import com.digiwizkid.islandhopper.data.models.GameMode
 import com.digiwizkid.islandhopper.data.models.GameUiState
 import com.digiwizkid.islandhopper.data.models.Island
 import com.digiwizkid.islandhopper.data.repository.GameRepository
+import com.digiwizkid.islandhopper.data.repository.SoundManager
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class GameViewModel : ViewModel() {
+class GameViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = GameRepository()
+        private val repository = GameRepository(application)
+    internal val soundManager by lazy { SoundManager() }
 
     private val _uiState = MutableStateFlow(GameUiState())
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
 
-    fun startGame(mode: GameMode) {
+    private var timerJob: Job? = null
+
+    fun startGame(mode: GameMode, timerMode: Boolean = false) {
         repository.loadQuestionsForMode(mode)
+        _uiState.value = _uiState.value.copy(
+            currentMode = mode,
+            isTimerMode = timerMode,
+            timeRemaining = 30,
+            streak = 0,
+            bestStreak = 0,
+            difficulty = Difficulty.STARTER
+        )
         loadQuestion()
+
+        if (timerMode) {
+            startTimer()
+        }
+    }
+
+    fun toggleMusic() {
+        val newState = !_uiState.value.isMusicOn
+        _uiState.value = _uiState.value.copy(isMusicOn = newState)
+        soundManager.setMusicOn(newState)
     }
 
     fun selectIsland(island: Island) {
         val currentState = _uiState.value
-
-        if (!island.isEnabled) return
+        if (currentState.isGameOver || !island.isEnabled) return
 
         val updatedIslands = currentState.activeIslands.map {
             if (it.id == island.id) it.copy(isEnabled = false) else it
@@ -35,31 +59,93 @@ class GameViewModel : ViewModel() {
         _uiState.value = currentState.copy(activeIslands = updatedIslands)
 
         if (island.isCorrect) {
-            repository.incrementScore()
+            val result = repository.recordAnswer(true)
             val newScore = repository.score.value
+            val newStreak = result.streak
+            val bestStreak = maxOf(_uiState.value.bestStreak, newStreak)
 
-            if (repository.hasMoreQuestions()) {
+            soundManager.playCorrectSound()
+            soundManager.vibrate(getApplication())
+
+            if (result.bonusAwarded) {
+                soundManager.playStreakSound()
+            }
+
+            _uiState.value = _uiState.value.copy(
+                score = newScore,
+                streak = newStreak,
+                bestStreak = bestStreak,
+                showParticles = true,
+                lastAnswerCorrect = true,
+                difficulty = repository.getCurrentDifficulty()
+            )
+
+            viewModelScope.launch {
+                delay(400)
+                _uiState.value = _uiState.value.copy(showParticles = false)
+            }
+
+            if (result.difficultyAdvanced) {
+                val newDiff = repository.getCurrentDifficulty()
+                _uiState.value = _uiState.value.copy(
+                    showLevelUp = true,
+                    levelUpMessage = "Congratulations! You reached ${newDiff.displayName}!"
+                )
+                soundManager.playStreakSound()
+                viewModelScope.launch {
+                    delay(2000)
+                    _uiState.value = _uiState.value.copy(showLevelUp = false)
+                    if (repository.hasMoreQuestions()) {
+                        _uiState.value = _uiState.value.copy(
+                            characterPosition = island.id
+                        )
+                        loadQuestion()
+                    } else {
+                        _uiState.value = _uiState.value.copy(isGameOver = true)
+                        soundManager.playGameOverSound()
+                        timerJob?.cancel()
+                    }
+                }
+            } else if (repository.hasMoreQuestions()) {
                 repository.advanceToNextQuestion()
                 _uiState.value = _uiState.value.copy(
-                    score = newScore,
                     characterPosition = island.id
                 )
                 loadQuestion()
             } else {
-                _uiState.value = _uiState.value.copy(
-                    score = newScore,
-                    isGameOver = true
-                )
+                _uiState.value = _uiState.value.copy(isGameOver = true)
+                soundManager.playGameOverSound()
+                timerJob?.cancel()
             }
         } else {
-            _uiState.value = _uiState.value.copy(triggerShakeId = island.id)
+            repository.recordAnswer(false)
+            soundManager.playWrongSound()
+            soundManager.vibrate(getApplication())
+
+            _uiState.value = _uiState.value.copy(
+                triggerShakeId = island.id,
+                streak = 0,
+                lastAnswerCorrect = false
+            )
+
             viewModelScope.launch {
                 delay(600)
                 _uiState.value = _uiState.value.copy(triggerShakeId = null)
-                val reEnabled = _uiState.value.activeIslands.map {
-                    it.copy(isEnabled = false)
+            }
+        }
+    }
+
+    private fun startTimer() {
+        timerJob?.cancel()
+        timerJob = viewModelScope.launch {
+            while (_uiState.value.timeRemaining > 0 && !_uiState.value.isGameOver) {
+                delay(1000)
+                val remaining = _uiState.value.timeRemaining - 1
+                _uiState.value = _uiState.value.copy(timeRemaining = remaining)
+                if (remaining <= 0) {
+                    _uiState.value = _uiState.value.copy(isGameOver = true)
+                    soundManager.playGameOverSound()
                 }
-                _uiState.value = _uiState.value.copy(activeIslands = reEnabled)
             }
         }
     }
@@ -72,5 +158,11 @@ class GameViewModel : ViewModel() {
                 activeIslands = question.second
             )
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        soundManager.release()
+        timerJob?.cancel()
     }
 }

@@ -1,85 +1,160 @@
 package com.digiwizkid.islandhopper.data.repository
 
+import android.content.Context
+import com.digiwizkid.islandhopper.data.models.Difficulty
 import com.digiwizkid.islandhopper.data.models.GameMode
 import com.digiwizkid.islandhopper.data.models.Island
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.json.JSONException
+import org.json.JSONObject
 
-class GameRepository {
+// Type alias for a question and its associated islands
+typealias Question = Pair<String, List<Island>>
 
-    private val questions = mapOf(
-        GameMode.SHAPES to listOf(
-            "Which one is a circle?" to listOf(
-                Island(1, "Circle", true),
-                Island(2, "Square", false),
-                Island(3, "Triangle", false)
-            ),
-            "Which one has 4 equal sides?" to listOf(
-                Island(1, "Rectangle", false),
-                Island(2, "Square", true),
-                Island(3, "Circle", false)
-            )
-        ),
-        GameMode.LETTERS to listOf(
-            "Which letter starts the word 'Apple'?" to listOf(
-                Island(1, "A", true),
-                Island(2, "B", false),
-                Island(3, "C", false)
-            ),
-            "Which letter comes after 'D'?" to listOf(
-                Island(1, "E", true),
-                Island(2, "F", false),
-                Island(3, "G", false)
-            )
-        ),
-        GameMode.NUMBERS to listOf(
-            "Which is the largest number?" to listOf(
-                Island(1, "3", false),
-                Island(2, "7", true),
-                Island(3, "1", false)
-            ),
-            "What is 2 + 3?" to listOf(
-                Island(1, "4", false),
-                Island(2, "5", true),
-                Island(3, "6", false)
-            )
-        )
-    )
+/**
+ * Repository that provides game questions. The questions are stored in a JSON asset
+ * located at `app/src/main/assets/questions.json`. This allows the data to be
+ * edited without recompiling the source.
+ */
+
+internal class GameRepository(private val context: Context) {
+
+    // Load the questions once at construction time
+    private val questionsByDifficulty: Map<Difficulty, Map<GameMode, List<Question>>>
+        = loadQuestionsFromJson()
+
+    /**
+     * Reads the JSON asset and builds the nested map used by the game logic.
+     * The JSON structure mirrors the original hard‑coded map.
+     */
+    private fun loadQuestionsFromJson(): Map<Difficulty, Map<GameMode, List<Question>>> {
+        return try {
+            val jsonString = context.assets.open("questions.json").bufferedReader().use { it.readText() }
+            val rootObj = JSONObject(jsonString)
+            val result = mutableMapOf<Difficulty, MutableMap<GameMode, MutableList<Question>>>()
+            for (diffKey in rootObj.keys()) {
+                val difficulty = Difficulty.valueOf(diffKey)
+                val modeObj = rootObj.getJSONObject(diffKey)
+                val modeMap = mutableMapOf<GameMode, MutableList<Question>>()
+                for (modeKey in modeObj.keys()) {
+                    val gameMode = GameMode.valueOf(modeKey)
+                    val questionsArray = modeObj.getJSONArray(modeKey)
+                    val questionList = mutableListOf<Question>()
+                    for (i in 0 until questionsArray.length()) {
+                        val qObj = questionsArray.getJSONObject(i)
+                        val questionText = qObj.getString("question")
+                        val islandsArray = qObj.getJSONArray("islands")
+                        val islands = mutableListOf<Island>()
+                        for (j in 0 until islandsArray.length()) {
+                            val islandObj = islandsArray.getJSONObject(j)
+                            val id = islandObj.getInt("id")
+                            val label = islandObj.getString("label")
+                            val correct = islandObj.getBoolean("correct")
+                            islands.add(Island(id, label, correct))
+                        }
+                        questionList.add(questionText to islands)
+                    }
+                    modeMap[gameMode] = questionList
+                }
+                result[difficulty] = modeMap
+            }
+            // Convert mutable maps to immutable ones for safety
+            result.mapValues { (_, modeMap) ->
+                modeMap.mapValues { (_, list) -> list.toList() }
+            }
+        } catch (e: JSONException) {
+            e.printStackTrace()
+            emptyMap()
+        }
+    }
 
     private val _score = MutableStateFlow(0)
     val score: StateFlow<Int> = _score.asStateFlow()
 
+    private var currentMode = GameMode.SHAPES
+    private var currentDifficultyIndex = 0
+    private var currentQuestions = emptyList<Question>()
     private var currentQuestionIndex = 0
-    private var currentModeQuestions = emptyList<Pair<String, List<Island>>>()
+    private var correctCount = 0
+    private var streak = 0
+
+    private val allDifficultyOrder = listOf(
+        Difficulty.STARTER, Difficulty.EASY, Difficulty.MEDIUM,
+        Difficulty.HARD, Difficulty.EXPERT
+    )
 
     fun loadQuestionsForMode(mode: GameMode) {
-        currentModeQuestions = questions[mode] ?: emptyList()
+        currentMode = mode
+        currentDifficultyIndex = 0
+        currentQuestions = questionsByDifficulty[Difficulty.STARTER]?.get(mode) ?: emptyList<Question>()
         currentQuestionIndex = 0
+        correctCount = 0
+        streak = 0
         _score.value = 0
     }
 
-    fun getCurrentQuestion(): Pair<String, List<Island>>? {
-        return currentModeQuestions.getOrNull(currentQuestionIndex)
-    }
+    fun getCurrentQuestion(): Question? =
+        currentQuestions.getOrNull(currentQuestionIndex)
 
-    fun hasMoreQuestions(): Boolean {
-        return currentQuestionIndex < currentModeQuestions.lastIndex
-    }
+    fun hasMoreQuestions(): Boolean =
+        currentQuestionIndex < currentQuestions.lastIndex
 
     fun advanceToNextQuestion() {
-        if (hasMoreQuestions()) {
-            currentQuestionIndex++
+        currentQuestionIndex++
+    }
+
+    internal fun recordAnswer(isCorrect: Boolean): StreakResult {
+        var bonusAwarded = false
+        var difficultyAdvanced = false
+        if (isCorrect) {
+            streak++
+            correctCount++
+            _score.value += 1
+            if (streak > 0 && streak % 3 == 0) {
+                _score.value += 1
+                bonusAwarded = true
+            }
+        } else {
+            streak = 0
+        }
+        val oldDifficultyIndex = currentDifficultyIndex
+        updateDifficulty()
+        if (currentDifficultyIndex > oldDifficultyIndex) difficultyAdvanced = true
+        return StreakResult(streak, bonusAwarded, difficultyAdvanced)
+    }
+
+    private fun updateDifficulty() {
+        val newIndex = when {
+            correctCount >= 20 -> 4
+            correctCount >= 15 -> 3
+            correctCount >= 10 -> 2
+            correctCount >= 5 -> 1
+            else -> 0
+        }
+        if (newIndex > currentDifficultyIndex) {
+            currentDifficultyIndex = newIndex
+            val newDifficulty = allDifficultyOrder[currentDifficultyIndex]
+            currentQuestions = questionsByDifficulty[newDifficulty]?.get(currentMode) ?: currentQuestions
+            currentQuestionIndex = 0
         }
     }
 
-    fun incrementScore() {
-        _score.value = _score.value + 1
-    }
+    fun getCurrentDifficulty(): Difficulty = allDifficultyOrder[currentDifficultyIndex]
 
     fun reset() {
+        currentDifficultyIndex = 0
+        currentQuestions = emptyList<Question>()
         currentQuestionIndex = 0
-        currentModeQuestions = emptyList()
+        correctCount = 0
+        streak = 0
         _score.value = 0
     }
 }
+
+internal data class StreakResult(
+    val streak: Int,
+    val bonusAwarded: Boolean,
+    val difficultyAdvanced: Boolean
+)
