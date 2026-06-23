@@ -23,7 +23,7 @@ class GameScreenTest {
 
         composeTestRule.waitForIdle()
 
-        composeTestRule.onNodeWithText("Which one is round?")
+        composeTestRule.onNodeWithText("Which shape has three sides?")
             .assertExists()
     }
 }

@@ -1,14 +1,7 @@
 {
   "STARTER": {
     "SHAPES": [
-      {
-        "question": "What shape is this?",
-        "islands": [
-          {"id": 1, "label": "Circle", "correct": true},
-          {"id": 2, "label": "Square", "correct": false},
-          {"id": 3, "label": "Triangle", "correct": false}
-        ]
-      }
+      {"question": "Which shape has three sides?", "islands": [{"id": 1, "label": "Triangle", "correct": true}, {"id": 2, "label": "Circle", "correct": false}]}
     ]
   }
 }
