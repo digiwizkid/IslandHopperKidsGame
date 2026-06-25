@@ -32,7 +32,7 @@ Every tier has its own unique question set.
 
 | Layer | Technology |
 |-------|-----------|
-| Language | Kotlin 2.0 |
+| Language | Kotlin 2.0.20 |
 | UI | Jetpack Compose + Material 3 |
 | Architecture | UDF (ViewModel + StateFlow) |
 | Navigation | Navigation Compose + fade transitions |

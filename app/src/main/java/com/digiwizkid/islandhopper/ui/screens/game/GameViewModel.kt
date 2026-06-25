@@ -9,6 +9,7 @@ import com.digiwizkid.islandhopper.data.models.GameUiState
 import com.digiwizkid.islandhopper.data.models.Island
 import com.digiwizkid.islandhopper.data.repository.GameRepository
 import com.digiwizkid.islandhopper.data.repository.SoundManager
+import com.digiwizkid.islandhopper.data.repository.TextToSpeechManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +21,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
         private val repository = GameRepository(application)
     internal val soundManager by lazy { SoundManager() }
+    private val ttsManager = TextToSpeechManager(application)
 
     private val _uiState = MutableStateFlow(GameUiState())
     val uiState: StateFlow<GameUiState> = _uiState.asStateFlow()
@@ -47,6 +49,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         val newState = !_uiState.value.isMusicOn
         _uiState.value = _uiState.value.copy(isMusicOn = newState)
         soundManager.setMusicOn(newState)
+        ttsManager.setMusicOn(newState)
     }
 
     fun selectIsland(island: Island) {
@@ -160,12 +163,15 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 questionPrompt = question.first,
                 activeIslands = question.second
             )
+            ttsManager.stop()
+            ttsManager.speak(question.first)
         }
     }
 
     override fun onCleared() {
         super.onCleared()
         soundManager.release()
+        ttsManager.release()
         timerJob?.cancel()
     }
 }
