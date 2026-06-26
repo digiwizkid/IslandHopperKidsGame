@@ -84,7 +84,7 @@ internal class GameRepository(private val context: Context) {
     private var streak = 0
 
     private val allDifficultyOrder = listOf(
-        Difficulty.STARTER, Difficulty.EASY, Difficulty.MEDIUM
+        Difficulty.STARTER, Difficulty.EASY, Difficulty.MEDIUM, Difficulty.HARD
     )
 
     fun loadQuestionsForMode(mode: GameMode) {
@@ -133,8 +133,9 @@ internal class GameRepository(private val context: Context) {
 
     private fun updateDifficulty() {
         val newIndex = when {
-            correctCount >= 10 -> 2
-            correctCount >= 5 -> 1
+            correctCount >= 90 -> 3
+            correctCount >= 60 -> 2
+            correctCount >= 30 -> 1
             else -> 0
         }
         if (newIndex > currentDifficultyIndex) {
@@ -148,6 +149,10 @@ internal class GameRepository(private val context: Context) {
     }
 
     fun getCurrentDifficulty(): Difficulty = allDifficultyOrder[currentDifficultyIndex]
+
+    fun getCurrentQuestionIndex(): Int = currentQuestionIndex
+
+    fun getTotalQuestions(): Int = currentQuestions.size
 
     fun reset() {
         currentDifficultyIndex = 0

@@ -49,9 +49,7 @@ internal fun NavGraph(navController: NavHostController) {
             GameScreen(
                 mode = mode,
                 onGameOver = { score ->
-                    navController.navigate(Screen.Result.createRoute(score)) {
-                        popUpTo(Screen.Home.route) { inclusive = true }
-                    }
+                    navController.navigate(Screen.Result.createRoute(score))
                 }
             )
         }
@@ -71,9 +69,7 @@ internal fun NavGraph(navController: NavHostController) {
                 mode = mode,
                 timerMode = true,
                 onGameOver = { score ->
-                    navController.navigate(Screen.Result.createRoute(score)) {
-                        popUpTo(Screen.Home.route) { inclusive = true }
-                    }
+                    navController.navigate(Screen.Result.createRoute(score))
                 }
             )
         }

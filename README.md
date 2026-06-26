@@ -7,8 +7,8 @@ Built with **Kotlin**, **Jetpack Compose**, and **Unidirectional Data Flow (UDF)
 ## Features
 
 - **3 game modes**: Shapes, Letters, Numbers
-- **3 difficulty tiers**: Starter → Easy → Medium (auto-advance at 5 and 10 correct answers)
-- **226 questions** across all tiers, loaded from `assets/questions.json` — no recompile to edit
+- **4 difficulty tiers**: Starter → Easy → Medium → Hard (auto-advance at 30, 60, and 90 correct answers)
+- **360 questions** (30 per mode × 3 modes × 4 difficulties = 120 per subject)
 - **Circular answer buttons**: 140–155 dp tap targets with vibrant rotating colours
 - **Score + streak**: always-visible star icon and 🔥 counter (bonus point every 3‑streak)
 - **Shake animation** on wrong answers, **particle burst** on correct
@@ -22,9 +22,10 @@ Built with **Kotlin**, **Jetpack Compose**, and **Unidirectional Data Flow (UDF)
 
 | Tier | Unlock | Questions | Example Topics |
 |------|--------|-----------|----------------|
-| **Starter** | Start | 76 | Basic shape ID, numbers 1–10, letters A–Z |
-| **Easy** | 5 correct | 75 | Real‑world shapes, addition (1+1…2+3), numbers 11–19, initial letter sounds |
-| **Medium** | 10 correct | 75 | 3‑D shapes (sphere/cube/cone/cylinder), add/sub to 10, letter order, vowels, phonics |
+| **Starter** | Start | 30 | Basic shape ID, numbers 1–10, letters A–J |
+| **Easy** | 30 correct | 30 | Real‑world shapes, addition (1+1…2+3), numbers 11–12, initial letter sounds A–J |
+| **Medium** | 60 correct | 30 | 3‑D shapes (sphere/cube/cone/cylinder), add/sub to 10, letter order, vowels |
+| **Hard** | 90 correct | 30 | Shape patterns, skip counting, place value, word families, blends
 
 Every tier has its own unique question set.
 

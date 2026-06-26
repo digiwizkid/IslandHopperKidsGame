@@ -17,5 +17,7 @@ data class GameUiState(
     val lastAnswerCorrect: Boolean? = null,
     val isMusicOn: Boolean = true,
     val showLevelUp: Boolean = false,
-    val levelUpMessage: String = ""
+    val levelUpMessage: String = "",
+    val currentQuestionIndex: Int = 0,
+    val totalQuestions: Int = 0
 )

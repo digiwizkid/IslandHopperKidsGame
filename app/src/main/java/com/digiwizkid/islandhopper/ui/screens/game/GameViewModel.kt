@@ -161,7 +161,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         if (question != null) {
             _uiState.value = _uiState.value.copy(
                 questionPrompt = question.first,
-                activeIslands = question.second
+                activeIslands = question.second,
+                currentQuestionIndex = repository.getCurrentQuestionIndex(),
+                totalQuestions = repository.getTotalQuestions()
             )
             ttsManager.stop()
             ttsManager.speak(question.first)

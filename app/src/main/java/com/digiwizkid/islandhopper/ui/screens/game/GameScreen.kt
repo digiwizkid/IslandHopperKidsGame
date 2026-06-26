@@ -1,5 +1,6 @@
 package com.digiwizkid.islandhopper.ui.screens.game
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,7 +30,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.digiwizkid.islandhopper.data.models.Difficulty
 import com.digiwizkid.islandhopper.data.models.GameMode
-import androidx.compose.foundation.background
 import com.digiwizkid.islandhopper.ui.components.CharacterAnimation
 import com.digiwizkid.islandhopper.ui.components.IslandButton
 import com.digiwizkid.islandhopper.ui.components.ParticleEffect
@@ -74,7 +74,7 @@ internal fun GameScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "🎉",
+                            text = "\uD83C\uDF89",
                             fontSize = 64.sp
                         )
                         Spacer(modifier = Modifier.height(16.dp))
@@ -133,7 +133,16 @@ internal fun GameScreen(
                         modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 16.dp)
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = "${uiState.currentQuestionIndex + 1} / ${uiState.totalQuestions}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f),
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     Column(
                         modifier = Modifier

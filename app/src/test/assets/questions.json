@@ -17,5 +17,10 @@
     "SHAPES": [
       {"question": "Which 3D shape is like a ball you can play with?", "islands": [{"id": 1, "label": "Sphere", "correct": true}, {"id": 2, "label": "Cube", "correct": false}]}
     ]
+  },
+  "HARD": {
+    "SHAPES": [
+      {"question": "Which shape has six sides?", "islands": [{"id": 1, "label": "Hexagon", "correct": true}, {"id": 2, "label": "Pentagon", "correct": false}]}
+    ]
   }
 }

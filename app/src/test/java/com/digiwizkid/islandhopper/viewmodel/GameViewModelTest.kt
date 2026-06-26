@@ -116,7 +116,7 @@ class GameViewModelTest {
     }
 
     @Test
-    fun `difficulty increases with correct answers`() {
+    fun `difficulty stays starter after 5 correct answers`() {
         viewModel.startGame(GameMode.SHAPES)
 
         repeat(5) {
@@ -128,9 +128,7 @@ class GameViewModelTest {
         }
 
         if (!viewModel.uiState.value.isGameOver) {
-            assertTrue(
-                viewModel.uiState.value.difficulty.ordinal > 0
-            )
+            assertEquals(Difficulty.STARTER, viewModel.uiState.value.difficulty)
         }
     }
 }
