@@ -9,12 +9,15 @@ internal class TextToSpeechManager(context: Context) {
     private var tts: TextToSpeech? = null
     private var isInitialized = false
     private var isMusicOn = true
+    private var pendingText: String? = null
 
     init {
         tts = TextToSpeech(context) { status ->
             isInitialized = status == TextToSpeech.SUCCESS
             if (isInitialized) {
                 tts?.language = Locale.US
+                speak(pendingText)
+                pendingText = null
             }
         }
     }
@@ -23,8 +26,13 @@ internal class TextToSpeechManager(context: Context) {
         isMusicOn = on
     }
 
-    fun speak(text: String) {
-        if (!isMusicOn || !isInitialized || tts == null) return
+    fun speak(text: String?) {
+        if (text == null) return
+        if (!isMusicOn || tts == null) return
+        if (!isInitialized) {
+            pendingText = text
+            return
+        }
         tts!!.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
     }
 
